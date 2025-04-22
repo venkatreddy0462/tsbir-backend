@@ -23,17 +23,21 @@ app.get("/fetch-result/:hallticket", async (req, res) => {
     });
 
     const response = await axios.post(
-      "https://results.eenadu.net/tg-inter-2025/tg-inter-1st-year-results-general.aspx",
-      formData,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "X-Requested-With": "XMLHttpRequest",
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36",
-        },
-      }
-    );
+  "https://results.eenadu.net/tg-inter-2025/tg-inter-1st-year-results-general.aspx",
+  formData,
+  {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36",
+      "Referer": "https://results.eenadu.net/tg-inter-2025/tg-inter-1st-year-results-general.aspx",
+      "Origin": "https://results.eenadu.net",
+      "X-Requested-With": "XMLHttpRequest",
+      "Cookie": "ASP.NET_SessionId=ztspxn4izspdplduqyjff525; __AP_SESSION__=xxx;", // Add actual session cookie here
+    },
+  }
+);
+
 
     // Parse HTML using cheerio
     const $ = cheerio.load(response.data);
