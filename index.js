@@ -1,39 +1,58 @@
-const express = require('express');
-const axios = require('axios');
-const cheerio = require('cheerio');
-const cors = require('cors');
+const express = require("express");
+const axios = require("axios");
+const cheerio = require("cheerio");
+const cors = require("cors");
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors());
 
-app.get('/fetch-result/:hallticket', async (req, res) => {
+app.get("/fetch-result/:hallticket", async (req, res) => {
   const hallticket = req.params.hallticket;
 
   try {
-    const url = `https://results.cgg.gov.in/ResultMemorandum.do?htno=${hallticket}`;
+    const formData = new URLSearchParams({
+      ctl00$ContentPlaceHolder1$txtHTNO: hallticket,
+      __EVENTTARGET: "",
+      __EVENTARGUMENT: "",
+      __VIEWSTATE: "<VIEWSTATE_HERE>",  // Optional: you can fetch this first if required
+      __VIEWSTATEGENERATOR: "<GENERATOR_HERE>",  // Optional
+      __ASYNCPOST: "true",
+      ctl00$ContentPlaceHolder1$btnSubmit: "Submit"
+    });
 
-    const response = await axios.get(url);
+    const response = await axios.post(
+      "https://results.eenadu.net/tg-inter-2025/tg-inter-1st-year-results-general.aspx",
+      formData,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-Requested-With": "XMLHttpRequest",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36",
+        },
+      }
+    );
+
+    // Parse HTML using cheerio
     const $ = cheerio.load(response.data);
 
-    // Example parsing logic — must be updated after live results release
-    const name = $('td:contains("Candidate Name")').next().text().trim();
-    const fatherName = $('td:contains("Father\'s Name")').next().text().trim();
-    const totalMarks = $('td:contains("Total Marks")').next().text().trim();
+    const name = $("span#ctl00_ContentPlaceHolder1_lblName").text().trim();
+    const hallTicketNo = $("span#ctl00_ContentPlaceHolder1_lblHTNO").text().trim();
+    const totalMarks = $("span#ctl00_ContentPlaceHolder1_lblTotal").text().trim();
 
     res.json({
-      hallticket,
+      hallTicketNo,
       name,
-      fatherName,
-      totalMarks
+      totalMarks,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Unable to fetch result' });
+    res.status(500).json({ error: "Failed to fetch result." });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
